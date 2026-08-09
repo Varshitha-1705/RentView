@@ -3899,3 +3899,382 @@ button {
   }
 
 }
+/* ======================================================
+   CONTACT OWNER POPUP
+   ====================================================== */
+
+.contact-owner-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+
+/* ======================================================
+   POPUP BOX
+   ====================================================== */
+
+.contact-owner-form {
+  position: relative;
+
+  width: min(520px, 100%);
+  max-height: calc(100vh - 40px);
+
+  overflow: hidden;
+
+  padding: 28px;
+
+  background: #111214;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
+
+  color: #ffffff;
+
+  box-sizing: border-box;
+}
+
+
+/* ======================================================
+   POPUP HEADER
+   ====================================================== */
+
+.contact-owner-form > .section-title {
+  position: relative;
+
+  display: block;
+
+  margin-bottom: 22px;
+  padding-right: 45px;
+}
+
+
+/* Small blue label */
+
+.contact-owner-form .section-label {
+  margin: 0 0 7px;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+
+  color: #5da9ff;
+}
+
+
+/* Request a Visit */
+
+.contact-owner-form .section-title h3 {
+  margin: 0 0 7px;
+
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 600;
+
+  color: #ffffff;
+}
+
+
+/* Description */
+
+.contact-owner-form .section-title p:not(.section-label) {
+  margin: 0;
+
+  max-width: 390px;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  color: #8f949d;
+}
+
+
+/* ======================================================
+   CLOSE BUTTON
+   ====================================================== */
+
+.contact-owner-form > .section-title > button {
+  position: absolute;
+
+  top: 0;
+  right: 0;
+
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+
+  background: #1b1d20;
+  color: #ffffff;
+
+  font-size: 18px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.contact-owner-form > .section-title > button:hover {
+  background: #25282c;
+  border-color: rgba(255, 255, 255, 0.25);
+
+  transform: rotate(90deg);
+}
+
+
+/* ======================================================
+   FORM FIELDS
+   ====================================================== */
+
+.contact-owner-form .form-field {
+  margin-bottom: 15px;
+}
+
+
+.contact-owner-form .form-field label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  color: #d7d9dd;
+}
+
+
+/* Inputs + Select */
+
+.contact-owner-form .form-field input,
+.contact-owner-form .form-field select {
+  width: 100%;
+  height: 46px;
+
+  box-sizing: border-box;
+
+  padding: 0 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+
+  outline: none;
+
+  background: #1b1d20;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+/* Placeholder */
+
+.contact-owner-form .form-field input::placeholder {
+  color: #70757d;
+}
+
+
+/* Select */
+
+.contact-owner-form .form-field select {
+  cursor: pointer;
+}
+
+
+/* Focus */
+
+.contact-owner-form .form-field input:focus,
+.contact-owner-form .form-field select:focus {
+  border-color: rgba(80, 155, 255, 0.65);
+
+  background: #1e2023;
+
+  box-shadow:
+    0 0 0 3px rgba(80, 155, 255, 0.08);
+}
+
+
+/* ======================================================
+   NUMBER + PHONE SIDE BY SIDE
+   ====================================================== */
+
+/*
+   Your current JSX has these as separate .form-field
+   elements.
+
+   We keep them full width here so the popup stays clean
+   and doesn't require changing your JSX.
+*/
+
+
+/* ======================================================
+   OWNER EMAIL
+   ====================================================== */
+
+.contact-owner-form .owner-contact-info {
+  margin-top: 18px;
+  margin-bottom: 20px;
+
+  padding: 14px 16px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+
+  background: #181a1d;
+}
+
+
+.contact-owner-form .owner-contact-info p {
+  margin: 0 0 5px;
+
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+
+  color: #777e88;
+}
+
+
+.contact-owner-form .owner-contact-info strong {
+  display: block;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: #ffffff;
+}
+
+
+/* ======================================================
+   BUTTON AREA
+   ====================================================== */
+
+.contact-owner-form > .property-actions {
+  display: flex;
+  gap: 10px;
+
+  margin-top: 0;
+}
+
+
+/* Make both buttons equal */
+
+.contact-owner-form > .property-actions button {
+  flex: 1;
+
+  height: 44px;
+
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+/* Cancel */
+
+.contact-owner-form > .property-actions .secondary-action {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  background: #181a1d;
+  color: #d7d9dd;
+}
+
+
+.contact-owner-form > .property-actions .secondary-action:hover {
+  background: #222529;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+
+/* Send Visit Request */
+
+.contact-owner-form > .property-actions .primary-action {
+  border: 1px solid rgba(80, 155, 255, 0.45);
+
+  background: #182b43;
+  color: #ffffff;
+}
+
+
+.contact-owner-form > .property-actions .primary-action:hover {
+  background: #203b5c;
+  border-color: rgba(80, 155, 255, 0.7);
+
+  transform: translateY(-1px);
+}
+
+
+/* ======================================================
+   MOBILE
+   ====================================================== */
+
+@media (max-width: 600px) {
+
+  .contact-owner-popup {
+    padding: 14px;
+  }
+
+  .contact-owner-form {
+    width: 100%;
+
+    max-height: calc(100vh - 28px);
+
+    padding: 22px;
+
+    border-radius: 16px;
+  }
+
+  .contact-owner-form .section-title h3 {
+    font-size: 21px;
+  }
+
+  .contact-owner-form .form-field {
+    margin-bottom: 13px;
+  }
+
+  .contact-owner-form > .property-actions {
+    flex-direction: column;
+  }
+
+  .contact-owner-form > .property-actions button {
+    width: 100%;
+  }
+}

@@ -49,7 +49,46 @@ const getPropertyById = async (req, res) => {
 // CREATE a property
 const createProperty = async (req, res) => {
   try {
-    const property = await Property.create(req.body);
+    const files = req.files || {};
+
+    // Uploaded image paths
+    const imagePaths = (files.images || []).map(
+      (file) => `/uploads/${file.filename}`
+    );
+
+    // Uploaded video path
+    const videoPath =
+      files.video && files.video.length > 0
+        ? `/uploads/${files.video[0].filename}`
+        : "";
+
+    const propertyData = {
+      ...req.body,
+
+      // Convert string values from FormData
+      rent: Number(req.body.rent),
+      deposit: Number(req.body.deposit),
+
+      // Convert parking string to boolean
+      parking:
+        req.body.parking === "true" ||
+        req.body.parking === true,
+
+      // Convert amenities string back to array
+      amenities: req.body.amenities
+        ? JSON.parse(req.body.amenities)
+        : [],
+
+      // Save uploaded media paths
+      images: imagePaths,
+      video: videoPath,
+
+      // Optional fields
+      description: req.body.description || "",
+      petPolicy: req.body.petPolicy || "",
+    };
+
+    const property = await Property.create(propertyData);
 
     res.status(201).json({
       success: true,
@@ -57,6 +96,8 @@ const createProperty = async (req, res) => {
       data: property,
     });
   } catch (error) {
+    console.error("Create property error:", error);
+
     res.status(400).json({
       success: false,
       message: "Failed to create property",

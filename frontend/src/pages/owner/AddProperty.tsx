@@ -100,23 +100,18 @@ function AddProperty() {
 
       const propertyData = {
         houseNumber: formData.houseNumber.trim(),
-
         title: formData.title.trim(),
-
         configuration: formData.configuration,
 
         building: "VNS Residency",
-
         location: "Bangalore, Karnataka",
 
         status: "available" as const,
 
         rent: Number(formData.rent),
-
         deposit: Number(formData.deposit),
 
         floor: formData.floor.trim(),
-
         furnishing: formData.furnishing,
 
         parking: formData.parking,
@@ -141,35 +136,18 @@ function AddProperty() {
 
         amenities: formData.amenities,
 
-        /*
-          Photos and videos are intentionally not
-          uploaded to the backend yet.
-
-          We will implement real media upload later.
-        */
-        images: [],
-
-        video: "",
-
         description: `A ${formData.configuration} ${formData.furnishing.toLowerCase()} property in VNS Residency.`,
       };
 
-      console.log(
-        "Creating property:",
-        propertyData
-      );
+      console.log("Creating property:", propertyData);
+      console.log("Selected images:", images);
+      console.log("Selected video:", video);
 
-      console.log(
-        "Selected images:",
-        images
-      );
-
-      console.log(
-        "Selected video:",
+      await createProperty(
+        propertyData,
+        images,
         video
       );
-
-      await createProperty(propertyData);
 
       alert("Property added successfully! 🎉");
 
@@ -192,7 +170,6 @@ function AddProperty() {
 
   return (
     <div className="app">
-
       <div className="background-effects">
         <div className="glow glow-one"></div>
         <div className="glow glow-two"></div>
@@ -203,10 +180,7 @@ function AddProperty() {
 
       <main className="add-property-page">
 
-        {/* Header */}
-
         <section className="add-property-header">
-
           <Link
             to="/owner"
             className="back-button"
@@ -218,51 +192,38 @@ function AddProperty() {
             RENTVIEW • OWNER PORTAL
           </p>
 
-          <h1>
-            Add New Property
-          </h1>
+          <h1>Add New Property</h1>
 
           <p>
             Add a new home to your building and
             make it available for tenants.
           </p>
-
         </section>
-
-        {/* Form */}
 
         <form
           className="property-form"
           onSubmit={handleSubmit}
         >
 
-          {/* =================================================
-              BASIC INFORMATION
-          ================================================= */}
+          {/* BASIC INFORMATION */}
 
           <section className="form-section">
-
             <div className="form-section-heading">
-
               <p className="section-label">
                 01 • BASIC INFORMATION
               </p>
 
-              <h2>
-                Property Details
-              </h2>
+              <h2>Property Details</h2>
 
               <p>
                 Enter the basic information about
                 this property.
               </p>
-
             </div>
 
             <div className="form-grid">
 
               <div className="form-field">
-
                 <label htmlFor="houseNumber">
                   House Number
                 </label>
@@ -276,11 +237,9 @@ function AddProperty() {
                   onChange={handleChange}
                   required
                 />
-
               </div>
 
               <div className="form-field">
-
                 <label htmlFor="title">
                   Property Title
                 </label>
@@ -294,17 +253,14 @@ function AddProperty() {
                   onChange={handleChange}
                   required
                 />
-
               </div>
 
               <div className="form-field">
-
                 <label htmlFor="rent">
                   Monthly Rent
                 </label>
 
                 <div className="input-with-prefix">
-
                   <span>₹</span>
 
                   <input
@@ -317,19 +273,15 @@ function AddProperty() {
                     min="0"
                     required
                   />
-
                 </div>
-
               </div>
 
               <div className="form-field">
-
                 <label htmlFor="deposit">
                   Security Deposit
                 </label>
 
                 <div className="input-with-prefix">
-
                   <span>₹</span>
 
                   <input
@@ -342,13 +294,10 @@ function AddProperty() {
                     min="0"
                     required
                   />
-
                 </div>
-
               </div>
 
               <div className="form-field">
-
                 <label htmlFor="configuration">
                   Configuration
                 </label>
@@ -359,28 +308,14 @@ function AddProperty() {
                   value={formData.configuration}
                   onChange={handleChange}
                 >
-                  <option value="1 BHK">
-                    1 BHK
-                  </option>
-
-                  <option value="2 BHK">
-                    2 BHK
-                  </option>
-
-                  <option value="3 BHK">
-                    3 BHK
-                  </option>
-
-                  <option value="4 BHK">
-                    4 BHK
-                  </option>
-
+                  <option value="1 BHK">1 BHK</option>
+                  <option value="2 BHK">2 BHK</option>
+                  <option value="3 BHK">3 BHK</option>
+                  <option value="4 BHK">4 BHK</option>
                 </select>
-
               </div>
 
               <div className="form-field">
-
                 <label htmlFor="floor">
                   Floor
                 </label>
@@ -394,11 +329,9 @@ function AddProperty() {
                   onChange={handleChange}
                   required
                 />
-
               </div>
 
               <div className="form-field">
-
                 <label htmlFor="furnishing">
                   Furnishing
                 </label>
@@ -420,19 +353,15 @@ function AddProperty() {
                   <option value="Fully Furnished">
                     Fully Furnished
                   </option>
-
                 </select>
-
               </div>
 
               <div className="form-field">
-
                 <label htmlFor="maintenance">
                   Monthly Maintenance
                 </label>
 
                 <div className="input-with-prefix">
-
                   <span>₹</span>
 
                   <input
@@ -445,37 +374,26 @@ function AddProperty() {
                     min="0"
                     required
                   />
-
                 </div>
-
               </div>
 
             </div>
-
           </section>
 
-          {/* =================================================
-              FEATURES
-          ================================================= */}
+          {/* FEATURES */}
 
           <section className="form-section">
-
             <div className="form-section-heading">
-
               <p className="section-label">
                 02 • FEATURES
               </p>
 
-              <h2>
-                Property Features
-              </h2>
-
+              <h2>Property Features</h2>
             </div>
 
             <div className="feature-options">
 
               <label className="toggle-option">
-
                 <input
                   type="checkbox"
                   name="parking"
@@ -483,14 +401,10 @@ function AddProperty() {
                   onChange={handleCheckboxChange}
                 />
 
-                <span>
-                  Parking Available
-                </span>
-
+                <span>Parking Available</span>
               </label>
 
               <label className="toggle-option">
-
                 <input
                   type="checkbox"
                   name="petsAllowed"
@@ -498,18 +412,13 @@ function AddProperty() {
                   onChange={handleCheckboxChange}
                 />
 
-                <span>
-                  Pets Allowed
-                </span>
-
+                <span>Pets Allowed</span>
               </label>
 
             </div>
 
             {formData.parking && (
-
               <div className="form-field narrow-field">
-
                 <label htmlFor="parkingType">
                   Parking Type
                 </label>
@@ -520,7 +429,6 @@ function AddProperty() {
                   value={formData.parkingType}
                   onChange={handleChange}
                 >
-
                   <option value="Covered Parking">
                     Covered Parking
                   </option>
@@ -528,23 +436,15 @@ function AddProperty() {
                   <option value="Open Parking">
                     Open Parking
                   </option>
-
                 </select>
-
               </div>
-
             )}
-
           </section>
 
-          {/* =================================================
-              AMENITIES
-          ================================================= */}
+          {/* AMENITIES */}
 
           <section className="form-section">
-
             <div className="form-section-heading">
-
               <p className="section-label">
                 03 • AMENITIES
               </p>
@@ -552,52 +452,34 @@ function AddProperty() {
               <h2>
                 What does this property offer?
               </h2>
-
             </div>
 
             <div className="amenity-checkbox-grid">
+              {amenitiesList.map((amenity) => (
+                <label
+                  key={amenity}
+                  className="amenity-checkbox"
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.amenities.includes(
+                      amenity
+                    )}
+                    onChange={() =>
+                      handleAmenityChange(amenity)
+                    }
+                  />
 
-              {amenitiesList.map(
-                (amenity) => (
-
-                  <label
-                    key={amenity}
-                    className="amenity-checkbox"
-                  >
-
-                    <input
-                      type="checkbox"
-                      checked={formData.amenities.includes(
-                        amenity
-                      )}
-                      onChange={() =>
-                        handleAmenityChange(
-                          amenity
-                        )
-                      }
-                    />
-
-                    <span>
-                      {amenity}
-                    </span>
-
-                  </label>
-
-                )
-              )}
-
+                  <span>{amenity}</span>
+                </label>
+              ))}
             </div>
-
           </section>
 
-          {/* =================================================
-              RENTAL INFORMATION
-          ================================================= */}
+          {/* RENTAL INFORMATION */}
 
           <section className="form-section">
-
             <div className="form-section-heading">
-
               <p className="section-label">
                 04 • RENTAL INFORMATION
               </p>
@@ -605,13 +487,11 @@ function AddProperty() {
               <h2>
                 Availability & Preferences
               </h2>
-
             </div>
 
             <div className="form-grid">
 
               <div className="form-field">
-
                 <label htmlFor="preferredTenants">
                   Preferred Tenants
                 </label>
@@ -625,11 +505,9 @@ function AddProperty() {
                   onChange={handleChange}
                   required
                 />
-
               </div>
 
               <div className="form-field">
-
                 <label htmlFor="availableFrom">
                   Available From
                 </label>
@@ -643,45 +521,34 @@ function AddProperty() {
                   onChange={handleChange}
                   required
                 />
-
               </div>
 
             </div>
-
           </section>
 
-          {/* =================================================
-              PROPERTY MEDIA
-          ================================================= */}
+          {/* PROPERTY MEDIA */}
 
           <section className="form-section">
-
             <div className="form-section-heading">
-
               <p className="section-label">
                 05 • PROPERTY MEDIA
               </p>
 
-              <h2>
-                Photos & Walkthrough
-              </h2>
+              <h2>Photos & Walkthrough</h2>
 
               <p>
                 Upload high-quality photos and a
                 walkthrough video of the property.
               </p>
-
             </div>
 
-            {/* Images */}
+            {/* IMAGES */}
 
             <div className="upload-area">
-
               <label
                 htmlFor="propertyImages"
                 className="upload-box"
               >
-
                 <span className="upload-icon">
                   +
                 </span>
@@ -693,7 +560,6 @@ function AddProperty() {
                 <span>
                   Select multiple images
                 </span>
-
               </label>
 
               <input
@@ -704,48 +570,34 @@ function AddProperty() {
                 onChange={handleImageUpload}
                 hidden
               />
-
             </div>
 
             {images.length > 0 && (
-
               <div className="selected-files">
-
                 <p>
                   {images.length} photo
-                  {images.length > 1
-                    ? "s"
-                    : ""}{" "}
-                  selected
+                  {images.length > 1 ? "s" : ""} selected
                 </p>
 
                 <div className="file-list">
-
-                  {images.map(
-                    (image) => (
-
-                      <span key={image.name}>
-                        {image.name}
-                      </span>
-
-                    )
-                  )}
-
+                  {images.map((image, index) => (
+                    <span
+                      key={`${image.name}-${index}`}
+                    >
+                      {image.name}
+                    </span>
+                  ))}
                 </div>
-
               </div>
-
             )}
 
-            {/* Video */}
+            {/* VIDEO */}
 
             <div className="upload-area">
-
               <label
                 htmlFor="propertyVideo"
                 className="upload-box"
               >
-
                 <span className="upload-icon">
                   +
                 </span>
@@ -757,7 +609,6 @@ function AddProperty() {
                 <span>
                   MP4, WebM or MOV
                 </span>
-
               </label>
 
               <input
@@ -767,37 +618,22 @@ function AddProperty() {
                 onChange={handleVideoUpload}
                 hidden
               />
-
             </div>
 
             {video && (
-
               <div className="selected-files">
-
-                <p>
-                  Video selected
-                </p>
+                <p>Video selected</p>
 
                 <div className="file-list">
-
-                  <span>
-                    {video.name}
-                  </span>
-
+                  <span>{video.name}</span>
                 </div>
-
               </div>
-
             )}
-
           </section>
 
-          {/* =================================================
-              ACTIONS
-          ================================================= */}
+          {/* ACTIONS */}
 
           <div className="form-actions">
-
             <Link
               to="/owner"
               className="secondary-action"
@@ -814,13 +650,10 @@ function AddProperty() {
                 ? "Adding Property..."
                 : "Add Property →"}
             </button>
-
           </div>
 
         </form>
-
       </main>
-
     </div>
   );
 }

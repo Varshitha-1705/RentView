@@ -4,16 +4,58 @@ import Navbar from "../components/layout/Navbar";
 import { getPropertyById } from "../services/propertyService";
 import type { Property } from "../data/propertyData";
 
+const BACKEND_URL = "http://localhost:5000";
+
+// ======================================================
+// MEDIA URL HELPER
+// ======================================================
+
+const getMediaUrl = (
+  path: string | undefined | null
+): string => {
+  if (!path) {
+    return "";
+  }
+
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://")
+  ) {
+    return path;
+  }
+
+  return `${BACKEND_URL}${
+    path.startsWith("/") ? path : `/${path}`
+  }`;
+};
+
+// ======================================================
+// PROPERTY DETAILS
+// ======================================================
+
 function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
 
-  const [property, setProperty] = useState<Property | null>(null);
+  const [property, setProperty] =
+    useState<Property | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // --------------------------------------------------
-  // FETCH PROPERTY FROM BACKEND
-  // --------------------------------------------------
+  const [showContactForm, setShowContactForm] =
+    useState(false);
+
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    occupation: "",
+    people: "1",
+    phone: "",
+    visitTime: "",
+  });
+
+  // ====================================================
+  // FETCH PROPERTY
+  // ====================================================
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -27,7 +69,11 @@ function PropertyDetails() {
         const data = await getPropertyById(id);
         setProperty(data);
       } catch (error) {
-        console.error(error);
+        console.error(
+          "Failed to load property:",
+          error
+        );
+
         setError("Unable to load property.");
       } finally {
         setLoading(false);
@@ -37,9 +83,9 @@ function PropertyDetails() {
     fetchProperty();
   }, [id]);
 
-  // --------------------------------------------------
+  // ====================================================
   // LOADING
-  // --------------------------------------------------
+  // ====================================================
 
   if (loading) {
     return (
@@ -48,12 +94,15 @@ function PropertyDetails() {
 
         <main className="property-details-page">
           <div className="property-info-card">
-            <p className="section-label">RENTVIEW</p>
+            <p className="section-label">
+              RENTVIEW
+            </p>
 
             <h1>Loading property...</h1>
 
             <p>
-              Please wait while we load the property details.
+              Please wait while we load the property
+              details.
             </p>
           </div>
         </main>
@@ -61,9 +110,9 @@ function PropertyDetails() {
     );
   }
 
-  // --------------------------------------------------
-  // PROPERTY NOT FOUND
-  // --------------------------------------------------
+  // ====================================================
+  // ERROR
+  // ====================================================
 
   if (error || !property) {
     return (
@@ -72,7 +121,9 @@ function PropertyDetails() {
 
         <main className="property-details-page">
           <div className="property-info-card">
-            <p className="section-label">RENTVIEW</p>
+            <p className="section-label">
+              RENTVIEW
+            </p>
 
             <h1>Property Not Found</h1>
 
@@ -93,15 +144,49 @@ function PropertyDetails() {
     );
   }
 
-  // --------------------------------------------------
-  // PROPERTY MEDIA
-  // --------------------------------------------------
+  // ====================================================
+  // MEDIA
+  // ====================================================
 
-  const mainImage = property.images?.[0] || "";
+  const mainImage = getMediaUrl(
+    property.images?.[0]
+  );
 
-  // --------------------------------------------------
+  const videoUrl = getMediaUrl(property.video);
+
+  // ====================================================
+  // SUBMIT VISIT REQUEST
+  // ====================================================
+
+  const handleContactSubmit = () => {
+    if (
+      !contactForm.name.trim() ||
+      !contactForm.occupation.trim() ||
+      !contactForm.phone.trim() ||
+      !contactForm.visitTime
+    ) {
+      alert("Please fill in all the details.");
+      return;
+    }
+
+    alert(
+      `Visit request submitted successfully!\n\nProperty: ${property.houseNumber}\nName: ${contactForm.name}\nPeople: ${contactForm.people}\nPreferred Time: ${contactForm.visitTime}`
+    );
+
+    setContactForm({
+      name: "",
+      occupation: "",
+      people: "1",
+      phone: "",
+      visitTime: "",
+    });
+
+    setShowContactForm(false);
+  };
+
+  // ====================================================
   // PAGE
-  // --------------------------------------------------
+  // ====================================================
 
   return (
     <div className="app">
@@ -128,9 +213,7 @@ function PropertyDetails() {
               {property.houseNumber.toUpperCase()}
             </p>
 
-            <h1>
-              {property.title}
-            </h1>
+            <h1>{property.title}</h1>
 
             <p className="property-location">
               {property.building} •{" "}
@@ -147,14 +230,15 @@ function PropertyDetails() {
 
         </section>
 
-        {/* VIDEO WALKTHROUGH */}
+        {/* ==================================================
+            VIDEO WALKTHROUGH
+        ================================================== */}
 
-        {property.video && (
+        {videoUrl && (
           <section className="walkthrough-section">
 
             <div className="section-title">
               <div>
-
                 <p className="section-label">
                   PROPERTY WALKTHROUGH
                 </p>
@@ -162,82 +246,84 @@ function PropertyDetails() {
                 <h2>
                   Take a virtual look around
                 </h2>
-
               </div>
             </div>
 
             <div className="video-container">
-
               <video
                 className="property-video"
                 controls
                 preload="metadata"
-                poster={mainImage}
+                poster={mainImage || undefined}
               >
-
                 <source
-                  src={property.video}
+                  src={videoUrl}
                   type="video/mp4"
                 />
 
-                Your browser does not support the video tag.
-
+                Your browser does not support the
+                video tag.
               </video>
-
             </div>
 
           </section>
         )}
 
-        {/* PROPERTY PHOTOS */}
+        {/* ==================================================
+            PROPERTY PHOTOS
+        ================================================== */}
 
-        <section className="photos-section">
+        {property.images &&
+          property.images.length > 0 && (
+            <section className="photos-section">
 
-          <div className="section-title">
-            <div>
+              <div className="section-title">
+                <div>
+                  <p className="section-label">
+                    PROPERTY PHOTOS
+                  </p>
 
-              <p className="section-label">
-                PROPERTY PHOTOS
-              </p>
-
-              <h2>
-                Explore the space
-              </h2>
-
-            </div>
-          </div>
-
-          <div className="photo-grid">
-
-            {property.images?.map(
-              (image, index) => (
-
-                <div
-                  key={`${image}-${index}`}
-                  className={
-                    index === 0
-                      ? "photo-card large"
-                      : "photo-card"
-                  }
-                >
-
-                  <img
-                    src={image}
-                    alt={`${property.houseNumber} view ${
-                      index + 1
-                    }`}
-                  />
-
+                  <h2>
+                    Explore the space
+                  </h2>
                 </div>
+              </div>
 
-              )
-            )}
+              <div className="photo-grid">
 
-          </div>
+                {property.images.map(
+                  (image, index) => {
+                    const imageUrl =
+                      getMediaUrl(image);
 
-        </section>
+                    return (
+                      <div
+                        key={`${image}-${index}`}
+                        className={
+                          index === 0
+                            ? "photo-card large"
+                            : "photo-card"
+                        }
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`${property.houseNumber} view ${
+                            index + 1
+                          }`}
+                        />
+                      </div>
+                    );
+                  }
+                )}
 
-        {/* PROPERTY INFORMATION + AI */}
+              </div>
+
+            </section>
+          )}
+
+        {/* ==================================================
+            PROPERTY INFORMATION + AI
+        ================================================== */}
 
         <section className="property-main-grid">
 
@@ -258,9 +344,7 @@ function PropertyDetails() {
             <div className="property-stats">
 
               <div>
-                <span>
-                  Monthly Rent
-                </span>
+                <span>Monthly Rent</span>
 
                 <strong>
                   ₹
@@ -271,9 +355,7 @@ function PropertyDetails() {
               </div>
 
               <div>
-                <span>
-                  Security Deposit
-                </span>
+                <span>Security Deposit</span>
 
                 <strong>
                   ₹
@@ -284,9 +366,7 @@ function PropertyDetails() {
               </div>
 
               <div>
-                <span>
-                  Configuration
-                </span>
+                <span>Configuration</span>
 
                 <strong>
                   {property.configuration}
@@ -294,9 +374,7 @@ function PropertyDetails() {
               </div>
 
               <div>
-                <span>
-                  Floor
-                </span>
+                <span>Floor</span>
 
                 <strong>
                   {property.floor}
@@ -304,9 +382,7 @@ function PropertyDetails() {
               </div>
 
               <div>
-                <span>
-                  Furnishing
-                </span>
+                <span>Furnishing</span>
 
                 <strong>
                   {property.furnishing}
@@ -314,9 +390,7 @@ function PropertyDetails() {
               </div>
 
               <div>
-                <span>
-                  Parking
-                </span>
+                <span>Parking</span>
 
                 <strong>
                   {property.parking
@@ -331,19 +405,15 @@ function PropertyDetails() {
 
             <div className="amenities">
 
-              <h3>
-                Amenities
-              </h3>
+              <h3>Amenities</h3>
 
               <div className="amenity-list">
 
                 {property.amenities?.map(
                   (amenity) => (
-
                     <span key={amenity}>
                       ✓ {amenity}
                     </span>
-
                   )
                 )}
 
@@ -355,9 +425,7 @@ function PropertyDetails() {
 
             <div className="property-description">
 
-              <h3>
-                About this home
-              </h3>
+              <h3>About this home</h3>
 
               <p>
                 {property.description ||
@@ -376,9 +444,7 @@ function PropertyDetails() {
 
             <div className="property-description">
 
-              <h3>
-                Pet Policy
-              </h3>
+              <h3>Pet Policy</h3>
 
               <p>
                 {property.petPolicy}
@@ -386,15 +452,17 @@ function PropertyDetails() {
 
             </div>
 
-            {/* ACTION BUTTONS */}
+            {/* CONTACT OWNER BUTTON */}
 
             <div className="property-actions">
 
-              <button className="primary-action">
-                I'm Interested
-              </button>
-
-              <button className="secondary-action">
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={() =>
+                  setShowContactForm(true)
+                }
+              >
                 Contact Owner
               </button>
 
@@ -404,11 +472,267 @@ function PropertyDetails() {
 
           {/* AI ASSISTANT */}
 
-          <PropertyAI property={property} />
+          <PropertyAI
+            property={property}
+          />
 
         </section>
 
       </main>
+
+      {/* ==================================================
+          CONTACT OWNER POPUP
+      ================================================== */}
+
+      {showContactForm && (
+        <div
+          className="contact-owner-popup"
+          onClick={(event) => {
+            if (
+              event.target === event.currentTarget
+            ) {
+              setShowContactForm(false);
+            }
+          }}
+        >
+
+          <div className="contact-owner-form">
+
+            {/* POPUP HEADER */}
+
+            <div className="section-title">
+
+              <div>
+                <p className="section-label">
+                  CONTACT OWNER
+                </p>
+
+                <h3>
+                  Request a Visit
+                </h3>
+
+                <p>
+                  Share your details and choose a
+                  convenient time to visit the home.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="contact-popup-close"
+                onClick={() =>
+                  setShowContactForm(false)
+                }
+                aria-label="Close"
+              >
+                ×
+              </button>
+
+            </div>
+
+            {/* NAME */}
+
+            <div className="form-field">
+
+              <label htmlFor="visitorName">
+                Full Name
+              </label>
+
+              <input
+                id="visitorName"
+                type="text"
+                value={contactForm.name}
+                onChange={(event) =>
+                  setContactForm({
+                    ...contactForm,
+                    name: event.target.value,
+                  })
+                }
+                placeholder="Enter your full name"
+              />
+
+            </div>
+
+            {/* OCCUPATION */}
+
+            <div className="form-field">
+
+              <label htmlFor="visitorOccupation">
+                Occupation
+              </label>
+
+              <input
+                id="visitorOccupation"
+                type="text"
+                value={contactForm.occupation}
+                onChange={(event) =>
+                  setContactForm({
+                    ...contactForm,
+                    occupation:
+                      event.target.value,
+                  })
+                }
+                placeholder="e.g. Software Engineer"
+              />
+
+            </div>
+
+            {/* NUMBER OF PEOPLE */}
+
+            <div className="form-field">
+
+              <label htmlFor="visitorPeople">
+                Number of People
+              </label>
+
+              <select
+                id="visitorPeople"
+                value={contactForm.people}
+                onChange={(event) =>
+                  setContactForm({
+                    ...contactForm,
+                    people: event.target.value,
+                  })
+                }
+              >
+                <option value="1">
+                  1 Person
+                </option>
+
+                <option value="2">
+                  2 People
+                </option>
+
+                <option value="3">
+                  3 People
+                </option>
+
+                <option value="4">
+                  4 People
+                </option>
+
+                <option value="5">
+                  5 People
+                </option>
+
+                <option value="6">
+                  6 People
+                </option>
+              </select>
+
+            </div>
+
+            {/* PHONE */}
+
+            <div className="form-field">
+
+              <label htmlFor="visitorPhone">
+                Phone Number
+              </label>
+
+              <input
+                id="visitorPhone"
+                type="tel"
+                value={contactForm.phone}
+                onChange={(event) =>
+                  setContactForm({
+                    ...contactForm,
+                    phone: event.target.value,
+                  })
+                }
+                placeholder="Enter your phone number"
+              />
+
+            </div>
+
+            {/* VISIT TIME */}
+
+            <div className="form-field">
+
+              <label htmlFor="visitTime">
+                Preferred Visit Time
+              </label>
+
+              <select
+                id="visitTime"
+                value={contactForm.visitTime}
+                onChange={(event) =>
+                  setContactForm({
+                    ...contactForm,
+                    visitTime:
+                      event.target.value,
+                  })
+                }
+              >
+
+                <option value="">
+                  Select owner's available time
+                </option>
+
+                <option value="10:00 AM - 12:00 PM">
+                  10:00 AM - 12:00 PM
+                </option>
+
+                <option value="12:00 PM - 2:00 PM">
+                  12:00 PM - 2:00 PM
+                </option>
+
+                <option value="2:00 PM - 4:00 PM">
+                  2:00 PM - 4:00 PM
+                </option>
+
+                <option value="4:00 PM - 6:00 PM">
+                  4:00 PM - 6:00 PM
+                </option>
+
+                <option value="6:00 PM - 8:00 PM">
+                  6:00 PM - 8:00 PM
+                </option>
+
+              </select>
+
+            </div>
+
+            {/* OWNER EMAIL */}
+
+            <div className="owner-contact-info">
+
+              <p>Owner's Email</p>
+
+              <strong>
+                owner@rentview.com
+              </strong>
+
+            </div>
+
+            {/* POPUP ACTIONS */}
+
+            <div className="property-actions">
+
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={() =>
+                  setShowContactForm(false)
+                }
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="primary-action"
+                onClick={handleContactSubmit}
+              >
+                Send Visit Request →
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
     </div>
   );
 }
@@ -438,11 +762,13 @@ function PropertyAI({
 
   const [input, setInput] = useState("");
 
-  // --------------------------------------------------
-  // TEMPORARY AI RESPONSE
-  // --------------------------------------------------
+  // ====================================================
+  // AI ANSWERS
+  // ====================================================
 
-  const getAnswer = (question: string) => {
+  const getAnswer = (
+    question: string
+  ): string => {
 
     const q = question.toLowerCase();
 
@@ -509,7 +835,7 @@ function PropertyAI({
       q.includes("visit") ||
       q.includes("tomorrow")
     ) {
-      return "You can submit a visit request using the I'm Interested button. The owner can then confirm the available visiting time.";
+      return "You can contact the owner to request a property visit and choose an available visiting time.";
     }
 
     return `I currently have information about ${
@@ -517,40 +843,46 @@ function PropertyAI({
     }'s rent, deposit, furnishing, parking, pet policy, floor, amenities and visit requests. Try asking me about one of these.`;
   };
 
-  // --------------------------------------------------
+  // ====================================================
   // SEND MESSAGE
-  // --------------------------------------------------
+  // ====================================================
 
-  const sendMessage = (question: string) => {
+  const sendMessage = (
+    question: string
+  ) => {
 
-    const trimmedQuestion = question.trim();
+    const trimmedQuestion =
+      question.trim();
 
     if (!trimmedQuestion) {
       return;
     }
 
-    const answer = getAnswer(trimmedQuestion);
+    const answer =
+      getAnswer(trimmedQuestion);
 
-    setMessages((previousMessages) => [
-      ...previousMessages,
+    setMessages(
+      (previousMessages) => [
+        ...previousMessages,
 
-      {
-        role: "user",
-        text: trimmedQuestion,
-      },
+        {
+          role: "user",
+          text: trimmedQuestion,
+        },
 
-      {
-        role: "ai",
-        text: answer,
-      },
-    ]);
+        {
+          role: "ai",
+          text: answer,
+        },
+      ]
+    );
 
     setInput("");
   };
 
-  // --------------------------------------------------
+  // ====================================================
   // AI UI
-  // --------------------------------------------------
+  // ====================================================
 
   return (
     <aside className="ai-panel">
@@ -615,6 +947,7 @@ function PropertyAI({
         <div className="suggested-questions">
 
           <button
+            type="button"
             onClick={() =>
               sendMessage(
                 "Is parking available?"
@@ -625,6 +958,7 @@ function PropertyAI({
           </button>
 
           <button
+            type="button"
             onClick={() =>
               sendMessage(
                 "What is the deposit?"
@@ -635,6 +969,7 @@ function PropertyAI({
           </button>
 
           <button
+            type="button"
             onClick={() =>
               sendMessage(
                 "Is it furnished?"
@@ -645,6 +980,7 @@ function PropertyAI({
           </button>
 
           <button
+            type="button"
             onClick={() =>
               sendMessage(
                 "Are pets allowed?"
@@ -655,6 +991,7 @@ function PropertyAI({
           </button>
 
           <button
+            type="button"
             onClick={() =>
               sendMessage(
                 "Can I visit tomorrow?"
@@ -679,11 +1016,9 @@ function PropertyAI({
             setInput(event.target.value)
           }
           onKeyDown={(event) => {
-
             if (event.key === "Enter") {
               sendMessage(input);
             }
-
           }}
           placeholder={`Ask about ${
             property.houseNumber

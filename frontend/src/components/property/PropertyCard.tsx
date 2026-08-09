@@ -14,7 +14,11 @@ function PropertyCard({ property }: PropertyCardProps) {
       {/* Property Image */}
       <div className="property-image">
         <img
-          src={property.images[0]}
+          src={
+            property.images?.[0]
+              ? `http://localhost:5000${property.images[0]}`
+              : ""
+          }
           alt={`${property.houseNumber} main view`}
         />
 

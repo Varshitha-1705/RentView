@@ -5,6 +5,7 @@ const propertyRoutes = require("./routes/propertyRoutes");
 
 const app = express();
 
+
 // CORS
 app.use(
   cors({
@@ -15,6 +16,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
   res.json({

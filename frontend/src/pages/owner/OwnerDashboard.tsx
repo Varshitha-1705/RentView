@@ -2,25 +2,79 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Navbar from "../../components/layout/Navbar";
-import { getProperties } from "../../services/propertyService";
+import {
+  getProperties,
+  updatePropertyStatus,
+} from "../../services/propertyService";
+
 import type { Property } from "../../data/propertyData";
+
+// ======================================================
+// BACKEND URL
+// ======================================================
+
+const BACKEND_URL = "http://localhost:5000";
+
+// ======================================================
+// MEDIA URL HELPER
+// ======================================================
+
+const getMediaUrl = (
+  path: string | undefined | null
+): string => {
+  if (!path) {
+    return "";
+  }
+
+  // Already a complete URL
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://")
+  ) {
+    return path;
+  }
+
+  // Backend path such as:
+  // /uploads/image.jpg
+  //
+  // becomes:
+  // http://localhost:5000/uploads/image.jpg
+
+  return `${BACKEND_URL}${
+    path.startsWith("/") ? path : `/${path}`
+  }`;
+};
+
+// ======================================================
+// OWNER DASHBOARD
+// ======================================================
 
 function OwnerDashboard() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [updatingPropertyId, setUpdatingPropertyId] =
+    useState<string | null>(null);
 
-  // --------------------------------------------------
-  // FETCH PROPERTIES FROM BACKEND
-  // --------------------------------------------------
+  // ====================================================
+  // FETCH PROPERTIES
+  // ====================================================
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const data = await getProperties();
+
         setProperties(data);
       } catch (error) {
-        console.error(error);
+        console.error(
+          "Failed to load properties:",
+          error
+        );
+
         setError("Unable to load properties.");
       } finally {
         setLoading(false);
@@ -30,79 +84,178 @@ function OwnerDashboard() {
     fetchProperties();
   }, []);
 
-  // --------------------------------------------------
+  // ====================================================
   // FILTER PROPERTIES
-  // --------------------------------------------------
+  // ====================================================
 
   const availableProperties = properties.filter(
-    (property) => property.status === "available"
+    (property) =>
+      property.status === "available"
   );
 
   const occupiedProperties = properties.filter(
-    (property) => property.status === "occupied"
+    (property) =>
+      property.status === "occupied"
   );
 
-  // --------------------------------------------------
+  // ====================================================
+  // MARK PROPERTY OCCUPIED / AVAILABLE
+  // ====================================================
+
+  const togglePropertyStatus = async (
+    property: Property
+  ) => {
+    if (!property._id) {
+      return;
+    }
+
+    const newStatus =
+      property.status === "available"
+        ? "occupied"
+        : "available";
+
+    try {
+      setUpdatingPropertyId(property._id);
+
+      // Update backend
+      const updatedProperty =
+        await updatePropertyStatus(
+          property._id,
+          newStatus
+        );
+
+      // Update frontend using backend response
+      setProperties((previousProperties) =>
+        previousProperties.map(
+          (currentProperty) =>
+            currentProperty._id === property._id
+              ? updatedProperty
+              : currentProperty
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Failed to update property status:",
+        error
+      );
+
+      alert(
+        "Failed to update property status. Please try again."
+      );
+    } finally {
+      setUpdatingPropertyId(null);
+    }
+  };
+
+  // ====================================================
+  // EDIT PROPERTY
+  // ====================================================
+
+  const handleEdit = (
+    property: Property
+  ) => {
+    alert(
+      `Edit functionality for ${property.houseNumber} will be connected next.`
+    );
+  };
+
+  // ====================================================
   // LOADING
-  // --------------------------------------------------
+  // ====================================================
 
   if (loading) {
     return (
       <div className="app">
+
+        <div className="background-glow"></div>
+
         <Navbar />
 
         <main className="owner-dashboard">
+
           <p className="section-label">
             RENTVIEW • OWNER PORTAL
           </p>
 
-          <h1>Loading properties...</h1>
+          <h1>
+            Loading properties...
+          </h1>
+
+          <p>
+            Please wait while your properties
+            are being loaded.
+          </p>
+
         </main>
+
       </div>
     );
   }
 
-  // --------------------------------------------------
+  // ====================================================
   // ERROR
-  // --------------------------------------------------
+  // ====================================================
 
   if (error) {
     return (
       <div className="app">
+
+        <div className="background-glow"></div>
+
         <Navbar />
 
         <main className="owner-dashboard">
+
           <p className="section-label">
             RENTVIEW • OWNER PORTAL
           </p>
 
-          <h1>Unable to load properties</h1>
+          <h1>
+            Unable to load properties
+          </h1>
 
-          <p>{error}</p>
+          <p>
+            {error}
+          </p>
+
+          <button
+            type="button"
+            className="primary-action"
+            onClick={() =>
+              window.location.reload()
+            }
+          >
+            Try Again
+          </button>
+
         </main>
+
       </div>
     );
   }
 
-  // --------------------------------------------------
+  // ====================================================
   // DASHBOARD
-  // --------------------------------------------------
+  // ====================================================
 
   return (
     <div className="app">
 
-      {/* Background Effects */}
+      {/* Background */}
+
       <div className="background-glow"></div>
 
       {/* Navbar */}
+
       <Navbar />
 
       {/* Dashboard */}
+
       <main className="owner-dashboard">
 
-        {/* =========================
+        {/* ==================================================
             HEADER
-        ========================= */}
+        ================================================== */}
 
         <section className="owner-header">
 
@@ -132,10 +285,9 @@ function OwnerDashboard() {
 
         </section>
 
-
-        {/* =========================
+        {/* ==================================================
             STATISTICS
-        ========================= */}
+        ================================================== */}
 
         <section className="owner-stats">
 
@@ -151,7 +303,6 @@ function OwnerDashboard() {
 
           </div>
 
-
           <div className="owner-stat-card">
 
             <span>
@@ -163,7 +314,6 @@ function OwnerDashboard() {
             </strong>
 
           </div>
-
 
           <div className="owner-stat-card">
 
@@ -179,10 +329,9 @@ function OwnerDashboard() {
 
         </section>
 
-
-        {/* =========================
-            PROPERTIES
-        ========================= */}
+        {/* ==================================================
+            YOUR PROPERTIES
+        ================================================== */}
 
         <section className="owner-properties">
 
@@ -207,133 +356,220 @@ function OwnerDashboard() {
 
           </div>
 
-
-          {/* =========================
+          {/* ==================================================
               PROPERTY LIST
-          ========================= */}
+          ================================================== */}
 
           <div className="owner-property-list">
 
-            {properties.map((property) => (
+            {properties.length === 0 ? (
 
-              <div
-                key={property._id}
-                className="owner-property-card"
-              >
+              <div className="property-info-card">
 
-                {/* Property Image */}
+                <p className="section-label">
+                  NO PROPERTIES
+                </p>
 
-                <div className="owner-property-image">
+                <h2>
+                  No properties yet
+                </h2>
 
-                  {property.images?.[0] ? (
-                    <img
-                      src={property.images[0]}
-                      alt={property.houseNumber}
-                    />
-                  ) : (
-                    <div className="property-image-placeholder">
-                      Property Image
-                    </div>
-                  )}
+                <p>
+                  Add your first property to
+                  start managing your listings.
+                </p>
 
-                </div>
-
-
-                {/* Property Information */}
-
-                <div className="owner-property-info">
-
-                  {/* Title + Status */}
-
-                  <div className="owner-property-title">
-
-                    <div>
-
-                      <p className="section-label">
-                        {property.houseNumber}
-                      </p>
-
-                      <h3>
-                        {property.title}
-                      </h3>
-
-                    </div>
-
-
-                    <span
-                      className={
-                        property.status === "available"
-                          ? "available"
-                          : "occupied"
-                      }
-                    >
-                      ● {property.status}
-                    </span>
-
-                  </div>
-
-
-                  {/* Details */}
-
-                  <div className="owner-property-details">
-
-                    <span>
-                      {property.configuration}
-                    </span>
-
-                    <span>
-                      {property.floor}
-                    </span>
-
-                    <span>
-                      {property.furnishing}
-                    </span>
-
-                    <span>
-                      ₹
-                      {property.rent.toLocaleString(
-                        "en-IN"
-                      )}
-                      /month
-                    </span>
-
-                  </div>
-
-
-                  {/* Actions */}
-
-                  <div className="owner-property-actions">
-
-                    <Link
-                      to={`/property/${property._id}`}
-                      className="secondary-action"
-                    >
-                      View Property
-                    </Link>
-
-                    <button
-                      type="button"
-                      className="secondary-action"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      type="button"
-                      className="secondary-action"
-                    >
-                      {property.status === "available"
-                        ? "Mark Occupied"
-                        : "Mark Available"}
-                    </button>
-
-                  </div>
-
-                </div>
+                <Link
+                  to="/owner/add-property"
+                  className="primary-action"
+                >
+                  + Add Property
+                </Link>
 
               </div>
 
-            ))}
+            ) : (
+
+              properties.map((property) => {
+
+                // ------------------------------------------
+                // PROPERTY IMAGE
+                // ------------------------------------------
+
+                const imageUrl =
+                  getMediaUrl(
+                    property.images?.[0]
+                  );
+
+                // ------------------------------------------
+                // STATUS
+                // ------------------------------------------
+
+                const isAvailable =
+                  property.status ===
+                  "available";
+
+                const isUpdating =
+                  updatingPropertyId ===
+                  property._id;
+
+                return (
+
+                  <div
+                    key={property._id}
+                    className="owner-property-card"
+                  >
+
+                    {/* ==================================================
+                        PROPERTY IMAGE
+                    ================================================== */}
+
+                    <div className="owner-property-image">
+
+                      {imageUrl ? (
+
+                        <img
+                          src={imageUrl}
+                          alt={`${property.houseNumber} property`}
+                          onError={(event) => {
+                            event.currentTarget.style.display =
+                              "none";
+                          }}
+                        />
+
+                      ) : (
+
+                        <div className="property-image-placeholder">
+                          Property Image
+                        </div>
+
+                      )}
+
+                    </div>
+
+                    {/* ==================================================
+                        PROPERTY INFORMATION
+                    ================================================== */}
+
+                    <div className="owner-property-info">
+
+                      {/* TITLE + STATUS */}
+
+                      <div className="owner-property-title">
+
+                        <div>
+
+                          <p className="section-label">
+                            {property.houseNumber}
+                          </p>
+
+                          <h3>
+                            {property.title}
+                          </h3>
+
+                        </div>
+
+                        <span
+                          className={
+                            isAvailable
+                              ? "available"
+                              : "occupied"
+                          }
+                        >
+                          ●{" "}
+                          {isAvailable
+                            ? "Available"
+                            : "Occupied"}
+                        </span>
+
+                      </div>
+
+                      {/* ==================================================
+                          PROPERTY DETAILS
+                      ================================================== */}
+
+                      <div className="owner-property-details">
+
+                        <span>
+                          {property.configuration}
+                        </span>
+
+                        <span>
+                          {property.floor}
+                        </span>
+
+                        <span>
+                          {property.furnishing}
+                        </span>
+
+                        <span>
+                          ₹
+                          {property.rent.toLocaleString(
+                            "en-IN"
+                          )}
+                          /month
+                        </span>
+
+                      </div>
+
+                      {/* ==================================================
+                          ACTIONS
+                      ================================================== */}
+
+                      <div className="owner-property-actions">
+
+                        {/* VIEW PROPERTY */}
+
+                        <Link
+                          to={`/property/${property._id}`}
+                          className="secondary-action"
+                        >
+                          View Property
+                        </Link>
+
+                        {/* EDIT */}
+
+                        <button
+                          type="button"
+                          className="secondary-action"
+                          onClick={() =>
+                            handleEdit(
+                              property
+                            )
+                          }
+                        >
+                          Edit
+                        </button>
+
+                        {/* MARK OCCUPIED / AVAILABLE */}
+
+                        <button
+                          type="button"
+                          className="secondary-action"
+                          disabled={isUpdating}
+                          onClick={() =>
+                            togglePropertyStatus(
+                              property
+                            )
+                          }
+                        >
+                          {isUpdating
+                            ? "Updating..."
+                            : isAvailable
+                            ? "Mark Occupied"
+                            : "Mark Available"}
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                );
+              })
+
+            )}
 
           </div>
 
