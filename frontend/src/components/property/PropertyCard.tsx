@@ -10,6 +10,7 @@ function PropertyCard({ property }: PropertyCardProps) {
 
   return (
     <div className="property-card">
+
       {/* Property Image */}
       <div className="property-image">
         <img
@@ -51,8 +52,9 @@ function PropertyCard({ property }: PropertyCardProps) {
 
         {/* Explore Button */}
         <button
+          type="button"
           className="explore-button"
-          onClick={() => navigate(`/property/${property.id}`)}
+          onClick={() => navigate(`/property/${property._id}`)}
         >
           Explore Home →
         </button>

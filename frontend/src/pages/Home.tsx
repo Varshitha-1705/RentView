@@ -1,21 +1,36 @@
+import { useEffect, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import PropertyCard from "../components/property/PropertyCard";
-import { properties } from "../data/propertyData";
-import AIChat from "../components/ai/AIChat";
+import { getProperties } from "../services/propertyService";
+import type { Property } from "../data/propertyData";
 
 function Home() {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const data = await getProperties();
+        setProperties(data);
+      } catch (error) {
+        console.error(error);
+        setError("Unable to load properties.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
   const availableProperties = properties.filter(
     (property) => property.status === "available"
   );
 
   return (
-    <div className="app">
-      <div className="background-effects">
-        <div className="glow glow-one"></div>
-        <div className="glow glow-two"></div>
-        <div className="glow glow-three"></div>
-      </div>
-
+    <div>
       <Navbar />
 
       <main className="home-container">
@@ -29,14 +44,17 @@ function Home() {
             Bangalore, Karnataka
           </p>
 
-          <div className="availability-badge">
-            <span></span>
-            {availableProperties.length}{" "}
-            {availableProperties.length === 1
-              ? "Home"
-              : "Homes"}{" "}
-            Available
-          </div>
+          {!loading && !error && (
+            <div className="availability-badge">
+              <span></span>
+
+              {availableProperties.length}{" "}
+              {availableProperties.length === 1
+                ? "Home"
+                : "Homes"}{" "}
+              Available
+            </div>
+          )}
         </section>
 
         {/* Available Houses */}
@@ -54,20 +72,35 @@ function Home() {
             </p>
           </div>
 
-          {/* Dynamic Property Cards */}
-          <div className="property-grid">
-            {availableProperties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-              />
-            ))}
-          </div>
+          {/* Loading */}
+          {loading && (
+            <p>Loading properties...</p>
+          )}
+
+          {/* Error */}
+          {!loading && error && (
+            <p>{error}</p>
+          )}
+
+          {/* Properties */}
+          {!loading && !error && (
+            <div className="property-grid">
+              {availableProperties.map((property) => (
+                <PropertyCard
+                  key={property._id}
+                  property={property}
+                />
+              ))}
+            </div>
+          )}
         </section>
       </main>
 
       {/* AI Chat Button */}
-      <AIChat />
+      <button className="ai-chat-button">
+        <span>✦</span>
+        Ask RentView AI
+      </button>
     </div>
   );
 }

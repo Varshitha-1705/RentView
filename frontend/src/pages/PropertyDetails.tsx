@@ -1,20 +1,71 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
-import { properties } from "../data/propertyData";
+import { getPropertyById } from "../services/propertyService";
+import type { Property } from "../data/propertyData";
 
 function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
 
-  const property = properties.find(
-    (item) => item.id === id
-  );
+  const [property, setProperty] = useState<Property | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // --------------------------------------------------
-  // HANDLE INVALID PROPERTY
+  // FETCH PROPERTY FROM BACKEND
   // --------------------------------------------------
 
-  if (!property) {
+  useEffect(() => {
+    const fetchProperty = async () => {
+      if (!id) {
+        setError("Property ID is missing.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const data = await getPropertyById(id);
+        setProperty(data);
+      } catch (error) {
+        console.error(error);
+        setError("Unable to load property.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperty();
+  }, [id]);
+
+  // --------------------------------------------------
+  // LOADING
+  // --------------------------------------------------
+
+  if (loading) {
+    return (
+      <div className="app">
+        <Navbar />
+
+        <main className="property-details-page">
+          <div className="property-info-card">
+            <p className="section-label">RENTVIEW</p>
+
+            <h1>Loading property...</h1>
+
+            <p>
+              Please wait while we load the property details.
+            </p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // --------------------------------------------------
+  // PROPERTY NOT FOUND
+  // --------------------------------------------------
+
+  if (error || !property) {
     return (
       <div className="app">
         <Navbar />
@@ -46,125 +97,7 @@ function PropertyDetails() {
   // PROPERTY MEDIA
   // --------------------------------------------------
 
-  const mainImage =
-    property.images[0] || "";
-
-  // --------------------------------------------------
-  // AI CHAT STATE
-  // --------------------------------------------------
-
-  const [messages, setMessages] = useState<
-    { role: "ai" | "user"; text: string }[]
-  >([
-    {
-      role: "ai",
-      text: `Hi! I'm your ${property.houseNumber} assistant. Ask me anything about this property.`,
-    },
-  ]);
-
-  const [input, setInput] = useState("");
-
-  // --------------------------------------------------
-  // AI RESPONSE LOGIC
-  // --------------------------------------------------
-
-  const getAnswer = (question: string) => {
-    const q = question.toLowerCase();
-
-    if (q.includes("parking")) {
-      return property.parking
-        ? `Yes. ${property.houseNumber} has ${property.parkingType}.`
-        : `No, ${property.houseNumber} does not have parking.`;
-    }
-
-    if (q.includes("deposit")) {
-      return `The security deposit for ${
-        property.houseNumber
-      } is ₹${property.deposit.toLocaleString("en-IN")}.`;
-    }
-
-    if (
-      q.includes("furnished") ||
-      q.includes("furniture")
-    ) {
-      return `${property.houseNumber} is ${property.furnishing.toLowerCase()}.`;
-    }
-
-    if (q.includes("pet")) {
-      return property.petsAllowed
-        ? "Yes, pets are allowed in this property."
-        : "Sorry, pets are not allowed in this property.";
-    }
-
-    if (
-      q.includes("rent") ||
-      q.includes("price")
-    ) {
-      return `The monthly rent for ${
-        property.houseNumber
-      } is ₹${property.rent.toLocaleString("en-IN")}.`;
-    }
-
-    if (q.includes("maintenance")) {
-      return `The monthly maintenance is ₹${property.maintenance.toLocaleString(
-        "en-IN"
-      )}.`;
-    }
-
-    if (
-      q.includes("visit") ||
-      q.includes("tomorrow")
-    ) {
-      return "You can submit a visit request using the I'm Interested button. The owner can then confirm the available visiting time.";
-    }
-
-    if (q.includes("available")) {
-      return property.status === "available"
-        ? `${property.houseNumber} is currently available for rent.`
-        : `${property.houseNumber} is currently occupied.`;
-    }
-
-    if (q.includes("floor")) {
-      return `${property.houseNumber} is located on the ${property.floor}.`;
-    }
-
-    if (
-      q.includes("amenities") ||
-      q.includes("facilities")
-    ) {
-      return `The available amenities include ${property.amenities.join(
-        ", "
-      )}.`;
-    }
-
-    return `I currently have information about ${property.houseNumber}'s rent, deposit, furnishing, parking, pets policy, maintenance, floor, amenities and visit requests. Try asking me about one of these.`;
-  };
-
-  // --------------------------------------------------
-  // SEND MESSAGE
-  // --------------------------------------------------
-
-  const sendMessage = (question: string) => {
-    const trimmedQuestion = question.trim();
-
-    if (!trimmedQuestion) return;
-
-    const answer = getAnswer(trimmedQuestion);
-
-    setMessages((previousMessages) => [
-      ...previousMessages,
-      {
-        role: "user",
-        text: trimmedQuestion,
-      },
-      {
-        role: "ai",
-        text: answer,
-      },
-    ]);
-
-    setInput("");
-  };
+  const mainImage = property.images?.[0] || "";
 
   // --------------------------------------------------
   // PAGE
@@ -185,14 +118,11 @@ function PropertyDetails() {
           ← Back to available homes
         </Link>
 
-        {/* =====================================================
-            PROPERTY HEADER
-        ===================================================== */}
+        {/* PROPERTY HEADER */}
 
         <section className="property-page-header">
 
           <div>
-
             <p className="section-label">
               RENTVIEW •{" "}
               {property.houseNumber.toUpperCase()}
@@ -206,7 +136,6 @@ function PropertyDetails() {
               {property.building} •{" "}
               {property.location}
             </p>
-
           </div>
 
           <span className="available">
@@ -218,58 +147,53 @@ function PropertyDetails() {
 
         </section>
 
-        {/* =====================================================
-            VIDEO WALKTHROUGH
-        ===================================================== */}
+        {/* VIDEO WALKTHROUGH */}
 
-        <section className="walkthrough-section">
+        {property.video && (
+          <section className="walkthrough-section">
 
-          <div className="section-title">
+            <div className="section-title">
+              <div>
 
-            <div>
+                <p className="section-label">
+                  PROPERTY WALKTHROUGH
+                </p>
 
-              <p className="section-label">
-                PROPERTY WALKTHROUGH
-              </p>
+                <h2>
+                  Take a virtual look around
+                </h2>
 
-              <h2>
-                Take a virtual look around
-              </h2>
+              </div>
+            </div>
+
+            <div className="video-container">
+
+              <video
+                className="property-video"
+                controls
+                preload="metadata"
+                poster={mainImage}
+              >
+
+                <source
+                  src={property.video}
+                  type="video/mp4"
+                />
+
+                Your browser does not support the video tag.
+
+              </video>
 
             </div>
 
-          </div>
+          </section>
+        )}
 
-          <div className="video-container">
-
-            <video
-              className="property-video"
-              controls
-              preload="metadata"
-              poster={mainImage}
-            >
-
-              <source
-                src={property.video}
-                type="video/mp4"
-              />
-
-              Your browser does not support the video tag.
-
-            </video>
-
-          </div>
-
-        </section>
-
-        {/* =====================================================
-            PROPERTY PHOTOS
-        ===================================================== */}
+        {/* PROPERTY PHOTOS */}
 
         <section className="photos-section">
 
           <div className="section-title">
-
             <div>
 
               <p className="section-label">
@@ -281,16 +205,15 @@ function PropertyDetails() {
               </h2>
 
             </div>
-
           </div>
 
           <div className="photo-grid">
 
-            {property.images.map(
+            {property.images?.map(
               (image, index) => (
 
                 <div
-                  key={image}
+                  key={`${image}-${index}`}
                   className={
                     index === 0
                       ? "photo-card large"
@@ -314,15 +237,11 @@ function PropertyDetails() {
 
         </section>
 
-        {/* =====================================================
-            PROPERTY INFORMATION + AI
-        ===================================================== */}
+        {/* PROPERTY INFORMATION + AI */}
 
         <section className="property-main-grid">
 
-          {/* =================================================
-              PROPERTY INFORMATION
-          ================================================= */}
+          {/* PROPERTY INFORMATION */}
 
           <div className="property-info-card">
 
@@ -339,35 +258,32 @@ function PropertyDetails() {
             <div className="property-stats">
 
               <div>
-
                 <span>
                   Monthly Rent
                 </span>
 
                 <strong>
-                  ₹{property.rent.toLocaleString(
+                  ₹
+                  {property.rent.toLocaleString(
                     "en-IN"
                   )}
                 </strong>
-
               </div>
 
               <div>
-
                 <span>
                   Security Deposit
                 </span>
 
                 <strong>
-                  ₹{property.deposit.toLocaleString(
+                  ₹
+                  {property.deposit.toLocaleString(
                     "en-IN"
                   )}
                 </strong>
-
               </div>
 
               <div>
-
                 <span>
                   Configuration
                 </span>
@@ -375,11 +291,9 @@ function PropertyDetails() {
                 <strong>
                   {property.configuration}
                 </strong>
-
               </div>
 
               <div>
-
                 <span>
                   Floor
                 </span>
@@ -387,11 +301,9 @@ function PropertyDetails() {
                 <strong>
                   {property.floor}
                 </strong>
-
               </div>
 
               <div>
-
                 <span>
                   Furnishing
                 </span>
@@ -399,11 +311,9 @@ function PropertyDetails() {
                 <strong>
                   {property.furnishing}
                 </strong>
-
               </div>
 
               <div>
-
                 <span>
                   Parking
                 </span>
@@ -413,7 +323,6 @@ function PropertyDetails() {
                     ? "Available"
                     : "Not Available"}
                 </strong>
-
               </div>
 
             </div>
@@ -428,7 +337,7 @@ function PropertyDetails() {
 
               <div className="amenity-list">
 
-                {property.amenities.map(
+                {property.amenities?.map(
                   (amenity) => (
 
                     <span key={amenity}>
@@ -451,15 +360,28 @@ function PropertyDetails() {
               </h3>
 
               <p>
-                A comfortable{" "}
-                {property.configuration}{" "}
-                {property.furnishing.toLowerCase()}{" "}
-                apartment located at{" "}
-                {property.building}. The property
-                offers essential amenities and is{" "}
-                {property.status === "available"
-                  ? "available for immediate occupancy."
-                  : "currently occupied."}
+                {property.description ||
+                  `A comfortable ${
+                    property.configuration
+                  } ${
+                    property.furnishing.toLowerCase()
+                  } apartment located at ${
+                    property.building
+                  }.`}
+              </p>
+
+            </div>
+
+            {/* PET POLICY */}
+
+            <div className="property-description">
+
+              <h3>
+                Pet Policy
+              </h3>
+
+              <p>
+                {property.petPolicy}
               </p>
 
             </div>
@@ -480,169 +402,315 @@ function PropertyDetails() {
 
           </div>
 
-          {/* =================================================
-              AI ASSISTANT
-          ================================================= */}
+          {/* AI ASSISTANT */}
 
-          <aside className="ai-panel">
-
-            {/* AI HEADER */}
-
-            <div className="ai-header">
-
-              <div className="ai-icon">
-                ✦
-              </div>
-
-              <div>
-
-                <h3>
-                  RentView AI
-                </h3>
-
-                <p>
-                  {property.houseNumber} Assistant
-                </p>
-
-              </div>
-
-              <span className="ai-status"></span>
-
-            </div>
-
-            {/* AI MESSAGES */}
-
-            <div className="ai-messages">
-
-              {messages.map(
-                (message, index) => (
-
-                  <div
-                    key={index}
-                    className={
-                      message.role === "user"
-                        ? "ai-message user-message"
-                        : "ai-message"
-                    }
-                  >
-
-                    <span className="message-icon">
-                      {message.role === "ai"
-                        ? "✦"
-                        : "You"}
-                    </span>
-
-                    <p>
-                      {message.text}
-                    </p>
-
-                  </div>
-
-                )
-              )}
-
-              {/* SUGGESTED QUESTIONS */}
-
-              <div className="suggested-questions">
-
-                <button
-                  onClick={() =>
-                    sendMessage(
-                      "Is parking available?"
-                    )
-                  }
-                >
-                  Is parking available?
-                </button>
-
-                <button
-                  onClick={() =>
-                    sendMessage(
-                      "What is the deposit?"
-                    )
-                  }
-                >
-                  What is the deposit?
-                </button>
-
-                <button
-                  onClick={() =>
-                    sendMessage(
-                      "Is it furnished?"
-                    )
-                  }
-                >
-                  Is it furnished?
-                </button>
-
-                <button
-                  onClick={() =>
-                    sendMessage(
-                      "Are pets allowed?"
-                    )
-                  }
-                >
-                  Are pets allowed?
-                </button>
-
-                <button
-                  onClick={() =>
-                    sendMessage(
-                      "Can I visit tomorrow?"
-                    )
-                  }
-                >
-                  Can I visit tomorrow?
-                </button>
-
-              </div>
-
-            </div>
-
-            {/* AI INPUT */}
-
-            <div className="ai-input-area">
-
-              <input
-                type="text"
-                value={input}
-                onChange={(event) =>
-                  setInput(event.target.value)
-                }
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    sendMessage(input);
-                  }
-                }}
-                placeholder={`Ask about ${property.houseNumber}...`}
-              />
-
-              <button
-                type="button"
-                onClick={() =>
-                  sendMessage(input)
-                }
-                aria-label="Send message"
-              >
-                ➤
-              </button>
-
-            </div>
-
-            {/* DISCLAIMER */}
-
-            <p className="ai-disclaimer">
-              AI answers are based on information
-              provided for{" "}
-              {property.houseNumber}.
-            </p>
-
-          </aside>
+          <PropertyAI property={property} />
 
         </section>
 
       </main>
     </div>
+  );
+}
+
+// ======================================================
+// AI ASSISTANT
+// ======================================================
+
+interface PropertyAIProps {
+  property: Property;
+}
+
+function PropertyAI({
+  property,
+}: PropertyAIProps) {
+
+  const [messages, setMessages] = useState<
+    { role: "ai" | "user"; text: string }[]
+  >([
+    {
+      role: "ai",
+      text: `Hi! I'm your ${
+        property.houseNumber
+      } assistant. Ask me anything about this property.`,
+    },
+  ]);
+
+  const [input, setInput] = useState("");
+
+  // --------------------------------------------------
+  // TEMPORARY AI RESPONSE
+  // --------------------------------------------------
+
+  const getAnswer = (question: string) => {
+
+    const q = question.toLowerCase();
+
+    if (q.includes("parking")) {
+      return property.parking
+        ? `Yes. ${property.houseNumber} has parking available.`
+        : `No, ${property.houseNumber} does not have parking.`;
+    }
+
+    if (q.includes("deposit")) {
+      return `The security deposit for ${
+        property.houseNumber
+      } is ₹${property.deposit.toLocaleString(
+        "en-IN"
+      )}.`;
+    }
+
+    if (
+      q.includes("furnished") ||
+      q.includes("furniture")
+    ) {
+      return `${
+        property.houseNumber
+      } is ${property.furnishing.toLowerCase()}.`;
+    }
+
+    if (q.includes("pet")) {
+      return property.petPolicy;
+    }
+
+    if (
+      q.includes("rent") ||
+      q.includes("price")
+    ) {
+      return `The monthly rent for ${
+        property.houseNumber
+      } is ₹${property.rent.toLocaleString(
+        "en-IN"
+      )}.`;
+    }
+
+    if (q.includes("floor")) {
+      return `${
+        property.houseNumber
+      } is located on the ${property.floor}.`;
+    }
+
+    if (
+      q.includes("amenities") ||
+      q.includes("facilities")
+    ) {
+      return `The available amenities include ${
+        property.amenities.join(", ")
+      }.`;
+    }
+
+    if (q.includes("available")) {
+      return property.status === "available"
+        ? `${property.houseNumber} is currently available for rent.`
+        : `${property.houseNumber} is currently occupied.`;
+    }
+
+    if (
+      q.includes("visit") ||
+      q.includes("tomorrow")
+    ) {
+      return "You can submit a visit request using the I'm Interested button. The owner can then confirm the available visiting time.";
+    }
+
+    return `I currently have information about ${
+      property.houseNumber
+    }'s rent, deposit, furnishing, parking, pet policy, floor, amenities and visit requests. Try asking me about one of these.`;
+  };
+
+  // --------------------------------------------------
+  // SEND MESSAGE
+  // --------------------------------------------------
+
+  const sendMessage = (question: string) => {
+
+    const trimmedQuestion = question.trim();
+
+    if (!trimmedQuestion) {
+      return;
+    }
+
+    const answer = getAnswer(trimmedQuestion);
+
+    setMessages((previousMessages) => [
+      ...previousMessages,
+
+      {
+        role: "user",
+        text: trimmedQuestion,
+      },
+
+      {
+        role: "ai",
+        text: answer,
+      },
+    ]);
+
+    setInput("");
+  };
+
+  // --------------------------------------------------
+  // AI UI
+  // --------------------------------------------------
+
+  return (
+    <aside className="ai-panel">
+
+      {/* AI HEADER */}
+
+      <div className="ai-header">
+
+        <div className="ai-icon">
+          ✦
+        </div>
+
+        <div>
+
+          <h3>
+            RentView AI
+          </h3>
+
+          <p>
+            {property.houseNumber} Assistant
+          </p>
+
+        </div>
+
+        <span className="ai-status"></span>
+
+      </div>
+
+      {/* AI MESSAGES */}
+
+      <div className="ai-messages">
+
+        {messages.map(
+          (message, index) => (
+
+            <div
+              key={index}
+              className={
+                message.role === "user"
+                  ? "ai-message user-message"
+                  : "ai-message"
+              }
+            >
+
+              <span className="message-icon">
+                {message.role === "ai"
+                  ? "✦"
+                  : "You"}
+              </span>
+
+              <p>
+                {message.text}
+              </p>
+
+            </div>
+
+          )
+        )}
+
+        {/* SUGGESTED QUESTIONS */}
+
+        <div className="suggested-questions">
+
+          <button
+            onClick={() =>
+              sendMessage(
+                "Is parking available?"
+              )
+            }
+          >
+            Is parking available?
+          </button>
+
+          <button
+            onClick={() =>
+              sendMessage(
+                "What is the deposit?"
+              )
+            }
+          >
+            What is the deposit?
+          </button>
+
+          <button
+            onClick={() =>
+              sendMessage(
+                "Is it furnished?"
+              )
+            }
+          >
+            Is it furnished?
+          </button>
+
+          <button
+            onClick={() =>
+              sendMessage(
+                "Are pets allowed?"
+              )
+            }
+          >
+            Are pets allowed?
+          </button>
+
+          <button
+            onClick={() =>
+              sendMessage(
+                "Can I visit tomorrow?"
+              )
+            }
+          >
+            Can I visit tomorrow?
+          </button>
+
+        </div>
+
+      </div>
+
+      {/* AI INPUT */}
+
+      <div className="ai-input-area">
+
+        <input
+          type="text"
+          value={input}
+          onChange={(event) =>
+            setInput(event.target.value)
+          }
+          onKeyDown={(event) => {
+
+            if (event.key === "Enter") {
+              sendMessage(input);
+            }
+
+          }}
+          placeholder={`Ask about ${
+            property.houseNumber
+          }...`}
+        />
+
+        <button
+          type="button"
+          onClick={() =>
+            sendMessage(input)
+          }
+          aria-label="Send message"
+        >
+          ➤
+        </button>
+
+      </div>
+
+      {/* DISCLAIMER */}
+
+      <p className="ai-disclaimer">
+        AI answers are based on information
+        provided for{" "}
+        {property.houseNumber}.
+      </p>
+
+    </aside>
   );
 }
 

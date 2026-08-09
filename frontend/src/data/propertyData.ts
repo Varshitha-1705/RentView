@@ -1,5 +1,7 @@
 export interface Property {
   id: string;
+  _id?: string;
+
   houseNumber: string;
 
   title: string;
@@ -16,19 +18,25 @@ export interface Property {
   furnishing: string;
 
   parking: boolean;
-  parkingType: string;
+  parkingType?: string;
 
-  petsAllowed: boolean;
+  petsAllowed?: boolean;
+  petPolicy?: string;
 
-  maintenance: number;
+  maintenance?: number;
 
-  preferredTenants: string;
-  availableFrom: string;
+  preferredTenants?: string;
+  availableFrom?: string;
 
   amenities: string[];
 
   images: string[];
   video: string;
+
+  description?: string;
+
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const properties: Property[] = [
@@ -128,7 +136,6 @@ export const properties: Property[] = [
       "Balcony",
     ],
 
-    // Temporary media until owner upload is implemented
     images: [
       "/properties/house-101/main.png",
       "/properties/house-101/living-room.png",
@@ -182,7 +189,6 @@ export const properties: Property[] = [
       "Balcony",
     ],
 
-    // Temporary media until owner upload is implemented
     images: [
       "/properties/house-101/main.png",
       "/properties/house-101/living-room.png",
@@ -193,4 +199,5 @@ export const properties: Property[] = [
     video: "/properties/house-101/walkthrough.mp4",
   },
 ];
+
 export const house101 = properties[0];
