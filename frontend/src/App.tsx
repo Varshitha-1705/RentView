@@ -27,7 +27,6 @@ function App() {
           element={<PropertyDetails />}
         />
 
-
         {/* =========================
             PROTECTED OWNER ROUTES
         ========================= */}

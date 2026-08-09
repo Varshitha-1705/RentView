@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/layout/Navbar";
+import { createProperty } from "../../services/propertyService";
 
 function AddProperty() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ function AddProperty() {
 
   const [images, setImages] = useState<File[]>([]);
   const [video, setVideo] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const amenitiesList = [
     "24/7 Water Supply",
@@ -59,9 +61,7 @@ function AddProperty() {
     }));
   };
 
-  const handleAmenityChange = (
-    amenity: string
-  ) => {
+  const handleAmenityChange = (amenity: string) => {
     setFormData((previous) => ({
       ...previous,
       amenities: previous.amenities.includes(amenity)
@@ -88,22 +88,111 @@ function AddProperty() {
     setVideo(event.target.files[0]);
   };
 
-  const handleSubmit = (
+  const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
-    console.log("Property Data:", formData);
-    console.log("Images:", images);
-    console.log("Video:", video);
+    if (submitting) return;
 
-    alert("Property form submitted successfully!");
+    try {
+      setSubmitting(true);
 
-    navigate("/owner");
+      const propertyData = {
+        houseNumber: formData.houseNumber.trim(),
+
+        title: formData.title.trim(),
+
+        configuration: formData.configuration,
+
+        building: "VNS Residency",
+
+        location: "Bangalore, Karnataka",
+
+        status: "available" as const,
+
+        rent: Number(formData.rent),
+
+        deposit: Number(formData.deposit),
+
+        floor: formData.floor.trim(),
+
+        furnishing: formData.furnishing,
+
+        parking: formData.parking,
+
+        parkingType: formData.parking
+          ? formData.parkingType
+          : "",
+
+        petsAllowed: formData.petsAllowed,
+
+        petPolicy: formData.petsAllowed
+          ? "Pets allowed"
+          : "Pets not allowed",
+
+        maintenance: Number(formData.maintenance),
+
+        preferredTenants:
+          formData.preferredTenants.trim(),
+
+        availableFrom:
+          formData.availableFrom.trim(),
+
+        amenities: formData.amenities,
+
+        /*
+          Photos and videos are intentionally not
+          uploaded to the backend yet.
+
+          We will implement real media upload later.
+        */
+        images: [],
+
+        video: "",
+
+        description: `A ${formData.configuration} ${formData.furnishing.toLowerCase()} property in VNS Residency.`,
+      };
+
+      console.log(
+        "Creating property:",
+        propertyData
+      );
+
+      console.log(
+        "Selected images:",
+        images
+      );
+
+      console.log(
+        "Selected video:",
+        video
+      );
+
+      await createProperty(propertyData);
+
+      alert("Property added successfully! 🎉");
+
+      navigate("/owner");
+    } catch (error) {
+      console.error(
+        "Failed to create property:",
+        error
+      );
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to add property."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="app">
+
       <div className="background-effects">
         <div className="glow glow-one"></div>
         <div className="glow glow-two"></div>
@@ -172,8 +261,6 @@ function AddProperty() {
 
             <div className="form-grid">
 
-              {/* House Number */}
-
               <div className="form-field">
 
                 <label htmlFor="houseNumber">
@@ -191,8 +278,6 @@ function AddProperty() {
                 />
 
               </div>
-
-              {/* Title */}
 
               <div className="form-field">
 
@@ -212,8 +297,6 @@ function AddProperty() {
 
               </div>
 
-              {/* Rent */}
-
               <div className="form-field">
 
                 <label htmlFor="rent">
@@ -221,6 +304,7 @@ function AddProperty() {
                 </label>
 
                 <div className="input-with-prefix">
+
                   <span>₹</span>
 
                   <input
@@ -233,11 +317,10 @@ function AddProperty() {
                     min="0"
                     required
                   />
+
                 </div>
 
               </div>
-
-              {/* Deposit */}
 
               <div className="form-field">
 
@@ -246,6 +329,7 @@ function AddProperty() {
                 </label>
 
                 <div className="input-with-prefix">
+
                   <span>₹</span>
 
                   <input
@@ -258,11 +342,10 @@ function AddProperty() {
                     min="0"
                     required
                   />
+
                 </div>
 
               </div>
-
-              {/* Configuration */}
 
               <div className="form-field">
 
@@ -291,11 +374,10 @@ function AddProperty() {
                   <option value="4 BHK">
                     4 BHK
                   </option>
+
                 </select>
 
               </div>
-
-              {/* Floor */}
 
               <div className="form-field">
 
@@ -314,8 +396,6 @@ function AddProperty() {
                 />
 
               </div>
-
-              {/* Furnishing */}
 
               <div className="form-field">
 
@@ -340,11 +420,10 @@ function AddProperty() {
                   <option value="Fully Furnished">
                     Fully Furnished
                   </option>
+
                 </select>
 
               </div>
-
-              {/* Maintenance */}
 
               <div className="form-field">
 
@@ -353,6 +432,7 @@ function AddProperty() {
                 </label>
 
                 <div className="input-with-prefix">
+
                   <span>₹</span>
 
                   <input
@@ -365,6 +445,7 @@ function AddProperty() {
                     min="0"
                     required
                   />
+
                 </div>
 
               </div>
@@ -374,7 +455,7 @@ function AddProperty() {
           </section>
 
           {/* =================================================
-              PROPERTY FEATURES
+              FEATURES
           ================================================= */}
 
           <section className="form-section">
@@ -393,8 +474,6 @@ function AddProperty() {
 
             <div className="feature-options">
 
-              {/* Parking */}
-
               <label className="toggle-option">
 
                 <input
@@ -409,8 +488,6 @@ function AddProperty() {
                 </span>
 
               </label>
-
-              {/* Pets */}
 
               <label className="toggle-option">
 
@@ -430,6 +507,7 @@ function AddProperty() {
             </div>
 
             {formData.parking && (
+
               <div className="form-field narrow-field">
 
                 <label htmlFor="parkingType">
@@ -442,6 +520,7 @@ function AddProperty() {
                   value={formData.parkingType}
                   onChange={handleChange}
                 >
+
                   <option value="Covered Parking">
                     Covered Parking
                   </option>
@@ -449,9 +528,11 @@ function AddProperty() {
                   <option value="Open Parking">
                     Open Parking
                   </option>
+
                 </select>
 
               </div>
+
             )}
 
           </section>
@@ -510,7 +591,7 @@ function AddProperty() {
           </section>
 
           {/* =================================================
-              TENANT INFORMATION
+              RENTAL INFORMATION
           ================================================= */}
 
           <section className="form-section">
@@ -570,7 +651,7 @@ function AddProperty() {
           </section>
 
           {/* =================================================
-              PHOTOS
+              PROPERTY MEDIA
           ================================================= */}
 
           <section className="form-section">
@@ -627,6 +708,7 @@ function AddProperty() {
             </div>
 
             {images.length > 0 && (
+
               <div className="selected-files">
 
                 <p>
@@ -652,6 +734,7 @@ function AddProperty() {
                 </div>
 
               </div>
+
             )}
 
             {/* Video */}
@@ -688,6 +771,7 @@ function AddProperty() {
             </div>
 
             {video && (
+
               <div className="selected-files">
 
                 <p>
@@ -695,18 +779,21 @@ function AddProperty() {
                 </p>
 
                 <div className="file-list">
+
                   <span>
                     {video.name}
                   </span>
+
                 </div>
 
               </div>
+
             )}
 
           </section>
 
           {/* =================================================
-              FORM ACTIONS
+              ACTIONS
           ================================================= */}
 
           <div className="form-actions">
@@ -721,8 +808,11 @@ function AddProperty() {
             <button
               type="submit"
               className="primary-action"
+              disabled={submitting}
             >
-              Add Property →
+              {submitting
+                ? "Adding Property..."
+                : "Add Property →"}
             </button>
 
           </div>
@@ -730,6 +820,7 @@ function AddProperty() {
         </form>
 
       </main>
+
     </div>
   );
 }

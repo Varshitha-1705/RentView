@@ -27,3 +27,27 @@ export const getPropertyById = async (
 
   return result.data;
 };
+
+export const createProperty = async (
+  propertyData: Omit<Property, "id">
+): Promise<Property> => {
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(propertyData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+
+    throw new Error(
+      errorData?.message || "Failed to create property"
+    );
+  }
+
+  const result = await response.json();
+
+  return result.data;
+};

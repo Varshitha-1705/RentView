@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const propertySchema = new mongoose.Schema(
   {
+    // =========================
+    // BASIC PROPERTY INFORMATION
+    // =========================
+
     houseNumber: {
       type: String,
       required: true,
@@ -32,11 +36,24 @@ const propertySchema = new mongoose.Schema(
       default: "Bangalore, Karnataka",
     },
 
+    // =========================
+    // AVAILABILITY
+    // =========================
+
     status: {
       type: String,
       enum: ["available", "occupied"],
       default: "available",
     },
+
+    availableFrom: {
+      type: String,
+      default: "",
+    },
+
+    // =========================
+    // RENTAL DETAILS
+    // =========================
 
     rent: {
       type: Number,
@@ -47,6 +64,20 @@ const propertySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+
+    maintenance: {
+      type: Number,
+      default: 0,
+    },
+
+    preferredTenants: {
+      type: String,
+      default: "",
+    },
+
+    // =========================
+    // PROPERTY FEATURES
+    // =========================
 
     floor: {
       type: String,
@@ -63,10 +94,37 @@ const propertySchema = new mongoose.Schema(
       default: false,
     },
 
+    parkingType: {
+      type: String,
+      default: "",
+    },
+
+    // =========================
+    // PET POLICY
+    // =========================
+
+    petsAllowed: {
+      type: Boolean,
+      default: false,
+    },
+
+    petPolicy: {
+      type: String,
+      default: "",
+    },
+
+    // =========================
+    // AMENITIES
+    // =========================
+
     amenities: {
       type: [String],
       default: [],
     },
+
+    // =========================
+    // PROPERTY MEDIA
+    // =========================
 
     images: {
       type: [String],
@@ -78,12 +136,11 @@ const propertySchema = new mongoose.Schema(
       default: "",
     },
 
-    description: {
-      type: String,
-      default: "",
-    },
+    // =========================
+    // DESCRIPTION
+    // =========================
 
-    petPolicy: {
+    description: {
       type: String,
       default: "",
     },
