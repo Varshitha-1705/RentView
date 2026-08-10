@@ -1,145 +1,114 @@
 import { useState } from "react";
+import { askAI } from "../../services/aiService";
 
 function AIChat() {
   const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState("");
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSend = () => {
-    if (!message.trim()) return;
+  const handleAsk = async () => {
+    if (!question.trim() || loading) {
+      return;
+    }
 
-    console.log("User message:", message);
+    try {
+      setLoading(true);
+      setAnswer("");
 
-    setMessage("");
+      const response = await askAI(question);
+
+      setAnswer(response);
+    } catch (error) {
+      console.error("AI ERROR:", error);
+
+      setAnswer(
+        "Sorry, I couldn't get an answer right now."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
-      {/* AI Chat Popup */}
+      {/* AI POPUP */}
+
       {isOpen && (
-        <div className="ai-chat-window">
-
-          {/* Header */}
+        <div className="ai-chat-popup">
           <div className="ai-chat-header">
-
-            <div className="ai-chat-title">
-
-              <div className="ai-chat-icon">
-                ✦
-              </div>
+            <div>
+              <span>✦</span>
 
               <div>
-                <h3>RentView AI</h3>
+                <strong>RentView AI</strong>
 
-                <span>
-                  Property Assistant
-                </span>
+                <p>
+                  Ask about available homes
+                </p>
               </div>
-
             </div>
 
             <button
               type="button"
-              className="ai-chat-close"
               onClick={() => setIsOpen(false)}
               aria-label="Close AI chat"
             >
               ×
             </button>
-
           </div>
 
+          <div className="ai-chat-body">
+            {!answer && !loading && (
+              <p className="ai-chat-welcome">
+                Hi! 👋 Ask me anything about
+                RentView properties.
+              </p>
+            )}
 
-          {/* Messages */}
-          <div className="ai-chat-messages">
-
-            <div className="ai-message ai-message-bot">
-
-              <div className="ai-message-avatar">
-                ✦
+            {answer && (
+              <div className="ai-chat-answer">
+                {answer}
               </div>
+            )}
 
-              <div className="ai-message-content">
-
-                <p>
-                  Hi! 👋 I'm RentView AI.
-                </p>
-
-                <p>
-                  I can help you with questions
-                  about available homes, rent,
-                  parking, amenities and more.
-                </p>
-
+            {loading && (
+              <div className="ai-chat-answer">
+                Thinking...
               </div>
-
-            </div>
-
-
-            {/* Temporary example message */}
-
-            <div className="ai-message ai-message-user">
-
-              <div className="ai-message-content">
-                <p>
-                  Is parking available?
-                </p>
-              </div>
-
-            </div>
-
-
-            <div className="ai-message ai-message-bot">
-
-              <div className="ai-message-avatar">
-                ✦
-              </div>
-
-              <div className="ai-message-content">
-
-                <p>
-                  Sure! I can help you check
-                  the parking availability.
-                </p>
-
-              </div>
-
-            </div>
-
+            )}
           </div>
 
-
-          {/* Input */}
-          <div className="ai-chat-input-area">
-
+          <div className="ai-chat-input">
             <input
               type="text"
-              placeholder="Ask about this home..."
-              value={message}
+              placeholder="Ask something..."
+              value={question}
               onChange={(event) =>
-                setMessage(event.target.value)
+                setQuestion(event.target.value)
               }
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
-                  handleSend();
+                  handleAsk();
                 }
               }}
             />
 
             <button
               type="button"
-              onClick={handleSend}
-              aria-label="Send message"
+              onClick={handleAsk}
+              disabled={
+                !question.trim() || loading
+              }
             >
               →
             </button>
-
           </div>
-
         </div>
       )}
 
+      {/* AI BUTTON */}
 
-      {/* Floating AI Button */}
       {!isOpen && (
         <button
           type="button"
