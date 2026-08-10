@@ -13,7 +13,6 @@ function OwnerLoginModal({
 
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
-
   const [error, setError] = useState("");
 
   const handleLogin = (
@@ -24,10 +23,10 @@ function OwnerLoginModal({
     setError("");
 
     /*
-     * TEMPORARY FRONTEND LOGIN
+     * TEMPORARY LOGIN
      *
-     * Real authentication will be implemented
-     * later using Express + MongoDB.
+     * This is still frontend-only authentication.
+     * We will replace this with JWT authentication.
      */
 
     if (
@@ -50,10 +49,7 @@ function OwnerLoginModal({
   };
 
   const modal = (
-    <div
-      className="owner-login-overlay"
-      onClick={onClose}
-    >
+    <div className="owner-login-modal-overlay">
       <div
         className="owner-login-modal"
         onClick={(event) =>
@@ -61,7 +57,6 @@ function OwnerLoginModal({
         }
       >
         {/* Close button */}
-
         <button
           type="button"
           className="owner-login-close"
@@ -72,7 +67,6 @@ function OwnerLoginModal({
         </button>
 
         {/* Header */}
-
         <div className="owner-login-header">
           <div className="owner-login-icon">
             ✦
@@ -90,13 +84,11 @@ function OwnerLoginModal({
         </div>
 
         {/* Login Form */}
-
         <form
           className="owner-login-form"
           onSubmit={handleLogin}
         >
           {/* User ID */}
-
           <div className="form-field">
             <label htmlFor="owner-user-id">
               User ID
@@ -116,7 +108,6 @@ function OwnerLoginModal({
           </div>
 
           {/* Password */}
-
           <div className="form-field">
             <label htmlFor="owner-password">
               Password
@@ -136,7 +127,6 @@ function OwnerLoginModal({
           </div>
 
           {/* Error */}
-
           {error && (
             <p className="owner-login-error">
               {error}
@@ -144,7 +134,6 @@ function OwnerLoginModal({
           )}
 
           {/* Login */}
-
           <button
             type="submit"
             className="owner-login-button"
@@ -161,12 +150,6 @@ function OwnerLoginModal({
       </div>
     </div>
   );
-
-  /*
-   * IMPORTANT:
-   * Render outside Navbar so fixed positioning
-   * is relative to the entire browser viewport.
-   */
 
   return createPortal(
     modal,

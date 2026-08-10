@@ -135,28 +135,18 @@ function OwnerDashboard() {
       );
     } catch (error) {
       console.error(
-        "Failed to update property status:",
+        "STATUS UPDATE ERROR:",
         error
       );
 
       alert(
-        "Failed to update property status. Please try again."
+        error instanceof Error
+          ? error.message
+          : "Failed to update property status."
       );
     } finally {
       setUpdatingPropertyId(null);
     }
-  };
-
-  // ====================================================
-  // EDIT PROPERTY
-  // ====================================================
-
-  const handleEdit = (
-    property: Property
-  ) => {
-    alert(
-      `Edit functionality for ${property.houseNumber} will be connected next.`
-    );
   };
 
   // ====================================================
@@ -406,8 +396,7 @@ function OwnerDashboard() {
                 // ------------------------------------------
 
                 const isAvailable =
-                  property.status ===
-                  "available";
+                  property.status === "available";
 
                 const isUpdating =
                   updatingPropertyId ===
@@ -526,20 +515,6 @@ function OwnerDashboard() {
                         >
                           View Property
                         </Link>
-
-                        {/* EDIT */}
-
-                        <button
-                          type="button"
-                          className="secondary-action"
-                          onClick={() =>
-                            handleEdit(
-                              property
-                            )
-                          }
-                        >
-                          Edit
-                        </button>
 
                         {/* MARK OCCUPIED / AVAILABLE */}
 

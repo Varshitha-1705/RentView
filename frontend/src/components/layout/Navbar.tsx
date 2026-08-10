@@ -3,31 +3,33 @@ import OwnerLoginModal from "../owner/OwnerLoginModal";
 
 function Navbar() {
   const [showOwnerLogin, setShowOwnerLogin] =
-  useState(false);
+    useState(false);
+
   return (
     <nav className="navbar">
-      <div className="navbar-container">
-
-        <div className="navbar-logo">
-          Rent<span>View</span>
-        </div>
-
-        <button
-          type="button"
-          className="owner-portal-button"
-          onClick={() =>
-            setShowOwnerLogin(true)
-          }
-        >
-          Owner Portal
-        </button>
-
+      {/* Logo */}
+      <div className="navbar-logo">
+        Rent<span>View</span>
       </div>
+
+      {/* Owner Portal Button */}
+      <button
+        type="button"
+        className="owner-portal-button"
+        onClick={() => {
+          console.log("Owner Portal clicked");
+          setShowOwnerLogin(true);
+        }}
+      >
+        Owner Portal
+      </button>
+
+      {/* Owner Login Modal */}
       {showOwnerLogin && (
         <OwnerLoginModal
-          onClose={() =>
-            setShowOwnerLogin(false)
-          }
+          onClose={() => {
+            setShowOwnerLogin(false);
+          }}
         />
       )}
     </nav>
