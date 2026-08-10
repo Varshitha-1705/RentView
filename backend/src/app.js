@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const propertyRoutes = require("./routes/propertyRoutes");
 const authRoutes = require("./routes/authRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 
@@ -66,6 +67,15 @@ app.use(
 app.use(
   "/api/properties",
   propertyRoutes
+);
+
+// ======================================================
+// AI ROUTES
+// ======================================================
+
+app.use(
+  "/api/ai",
+  aiRoutes
 );
 
 // ======================================================

@@ -9,6 +9,9 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // AI CHAT
+  const [showAiChat, setShowAiChat] = useState(false);
+
   useEffect(() => {
     const fetchProperties = async () => {
       try {
@@ -73,14 +76,10 @@ function Home() {
           </div>
 
           {/* Loading */}
-          {loading && (
-            <p>Loading properties...</p>
-          )}
+          {loading && <p>Loading properties...</p>}
 
           {/* Error */}
-          {!loading && error && (
-            <p>{error}</p>
-          )}
+          {!loading && error && <p>{error}</p>}
 
           {/* Properties */}
           {!loading && !error && (
@@ -96,8 +95,58 @@ function Home() {
         </section>
       </main>
 
+      {/* ==================================================
+          AI CHAT
+      ================================================== */}
+
+      {showAiChat && (
+        <div className="ai-chat-popup">
+          <div className="ai-chat-popup-header">
+            <div>
+              <strong>RentView AI</strong>
+              <span>Property Assistant</span>
+            </div>
+
+            <button
+              type="button"
+              className="ai-chat-close"
+              onClick={() => setShowAiChat(false)}
+              aria-label="Close AI chat"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="ai-chat-popup-body">
+            <p>
+              👋 Hi! I’m RentView AI.
+            </p>
+
+            <p>
+              I can help you find the right home
+              at VNS Residency.
+            </p>
+          </div>
+
+          <div className="ai-chat-popup-input">
+            <input
+              type="text"
+              placeholder="Ask about properties..."
+            />
+
+            <button type="button">
+              →
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* AI Chat Button */}
-      <button className="ai-chat-button">
+      <button
+        type="button"
+        className="ai-chat-button"
+        onClick={() => setShowAiChat((previous) => !previous)}
+      >
         <span>✦</span>
         Ask RentView AI
       </button>
